@@ -65,6 +65,7 @@ class _AudioImportState extends State<AudioImport> {
       "genre": "Pop",
       "size": "7.5 MB",
       "format": "MP3",
+      "path": "/sample_tracks/upbeat_pop_demo.mp3",
     },
     {
       "id": 2,
@@ -77,6 +78,7 @@ class _AudioImportState extends State<AudioImport> {
       "genre": "Hip-Hop",
       "size": "6.8 MB",
       "format": "MP3",
+      "path": "/sample_tracks/chill_hip_hop.mp3",
     },
     {
       "id": 3,
@@ -89,6 +91,7 @@ class _AudioImportState extends State<AudioImport> {
       "genre": "Rock",
       "size": "10.2 MB",
       "format": "WAV",
+      "path": "/sample_tracks/rock_anthem.wav",
     },
   ];
 
