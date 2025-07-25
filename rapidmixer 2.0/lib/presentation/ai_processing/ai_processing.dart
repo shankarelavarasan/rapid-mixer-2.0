@@ -165,7 +165,7 @@ class _AIProcessingState extends State<AIProcessing>
   }
 
   Future<void> _startProcessing() async {
-    if (_inputFileData == null || _inputFileData!["path"] == null || (_inputFileData!["path"] as String).isEmpty) {
+    if (_inputFileData == null || !_inputFileData!.containsKey("path") || _inputFileData!["path"] == null || (_inputFileData!["path"] as String).isEmpty) {
       _showErrorDialog('Invalid input file path');
       return;
     }
@@ -197,10 +197,10 @@ class _AIProcessingState extends State<AIProcessing>
       }
     } catch (e) {
       if (mounted && !_isCancelled) {
-        _showErrorDialog('Processing failed: \$e');
+        _showErrorDialog('Processing failed: ${e}');
       }
     } finally {
-      if (mounted) {
+      if (mounted && !_isCancelled) {
         setState(() {
           _isProcessing = false;
         });

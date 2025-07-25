@@ -521,7 +521,7 @@ class _AudioImportState extends State<AudioImport> {
                           "format": track["format"],
                           "artist": track["artist"],
                           "bpm": track["bpm"],
-                          "path": "", // Ensure 'path' key exists for sample tracks
+                          "path": track["path"] ?? "/sample_tracks/${track["title"].toString().toLowerCase().replaceAll(' ', '_')}.${(track["format"] as String).toLowerCase()}", // Use track path or generate a mock path
                         };
                       });
                       Navigator.pop(context);

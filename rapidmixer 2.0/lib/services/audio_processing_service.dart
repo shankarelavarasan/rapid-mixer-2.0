@@ -1,5 +1,6 @@
 import 'dart:io' if (dart.library.io) 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
@@ -32,9 +33,23 @@ class AudioProcessingService {
   // Mock stem separation for demo purposes
   // In a real app, this would connect to a backend service like Spleeter or Demucs
   Future<Map<String, String>> separateStems(String inputFilePath) async {
+    if (inputFilePath == null || inputFilePath.isEmpty) {
+      _errorController.add('Invalid input file path');
+      return {};
+    }
+
     _isProcessing = true;
-    _statusController.add('Uploading audio for AI processing...');
+    
     try {
+      // For demo purposes, use mock implementations instead of actual API call
+      if (kIsWeb) {
+        return await _mockStemSeparationWeb(inputFilePath);
+      } else {
+        return await _mockStemSeparationMobile(inputFilePath);
+      }
+      
+      /* Commented out actual API implementation for demo
+      _statusController.add('Uploading audio for AI processing...');
       final uri = Uri.parse('https://your-backend-api.com/process');
       final request = http.MultipartRequest('POST', uri)
         ..files.add(await http.MultipartFile.fromPath('audio', inputFilePath));
@@ -50,11 +65,12 @@ class AudioProcessingService {
         _statusController.add('Stem separation completed!');
         return stems;
       } else {
-        _errorController.add('Backend error: \${response.statusCode}');
+        _errorController.add('Backend error: ${response.statusCode}');
         return {};
       }
+      */
     } catch (e) {
-      _errorController.add('Stem separation failed: \$e');
+      _errorController.add('Stem separation failed: $e');
       return {};
     } finally {
       _isProcessing = false;
