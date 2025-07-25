@@ -393,7 +393,9 @@ class _EffectsPanelState extends State<EffectsPanel>
 
   void _handleEffectReset(String effectType) {
     setState(() {
-      _effectsParameters[effectType]!.clear();
+      if (_effectsParameters.containsKey(effectType) && _effectsParameters[effectType] != null) {
+        _effectsParameters[effectType]!.clear();
+      }
     });
     _processAudioReset(effectType);
   }

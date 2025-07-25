@@ -124,7 +124,9 @@ class _EqControlsWidgetState extends State<EqControlsWidget> {
                 ),
                 SizedBox(height: 1.h),
                 Text(
-                  '${_eqValues[frequency]!.toStringAsFixed(1)}dB',
+                  _eqValues.containsKey(frequency) && _eqValues[frequency] != null
+                      ? '${_eqValues[frequency]!.toStringAsFixed(1)}dB'
+                      : '0.0dB',
                   style: AppTheme.darkTheme.textTheme.bodySmall?.copyWith(
                     color: widget.isBypassed
                         ? AppTheme.textSecondary
