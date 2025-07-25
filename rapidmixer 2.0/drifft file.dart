@@ -518,6 +518,7 @@ class _AudioImportState extends State<AudioImport> {
                           "format": track["format"],
                           "artist": track["artist"],
                           "bpm": track["bpm"],
+                          "path": "", // Ensure 'path' key exists for sample tracks
                         };
                       });
                       Navigator.pop(context);
