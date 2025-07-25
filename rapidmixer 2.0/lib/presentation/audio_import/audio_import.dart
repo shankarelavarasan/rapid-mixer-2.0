@@ -659,6 +659,10 @@ class _AudioImportState extends State<AudioImport> {
   }
 
   Future<void> _processWithAI() async {
+    if (selectedFile == null || selectedFile!["path"] == null || (selectedFile!["path"] as String).isEmpty) {
+      _showErrorSnackBar("Please select a valid audio file before processing.");
+      return;
+    }
     setState(() {
       isProcessing = true;
     });
