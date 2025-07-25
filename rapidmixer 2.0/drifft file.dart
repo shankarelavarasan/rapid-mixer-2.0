@@ -596,7 +596,11 @@ class _AudioImportState extends State<AudioImport> {
     });
 
     // Navigate to AI processing screen
-    Navigator.pushNamed(context, '/ai-processing');
+    if (selectedFile != null && selectedFile["path"] != null && (selectedFile["path"] as String).isNotEmpty) {
+      Navigator.pushNamed(context, '/ai-processing', arguments: selectedFile);
+    } else {
+      _showErrorSnackBar("Please select a valid audio file before processing with AI.");
+    }
   }
 
   void _showErrorSnackBar(String message) {

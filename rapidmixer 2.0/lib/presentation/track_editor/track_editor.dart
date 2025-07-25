@@ -680,7 +680,19 @@ class _TrackEditorState extends State<TrackEditor>
           SizedBox(height: 2.h),
           FloatingActionButton(
             heroTag: "ai_processing",
-            onPressed: () => Navigator.pushNamed(context, '/ai-processing'),
+            onPressed: () {
+              if (_tracks.isNotEmpty && _tracks[0]["path"] != null && (_tracks[0]["path"] as String).isNotEmpty) {
+                Navigator.pushNamed(context, '/ai-processing', arguments: _tracks[0]);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("No valid audio track available for AI processing."),
+                    backgroundColor: AppTheme.errorColor,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
             backgroundColor: AppTheme.successColor,
             child: CustomIconWidget(
               iconName: 'auto_fix_high',
