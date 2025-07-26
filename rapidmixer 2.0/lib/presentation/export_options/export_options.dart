@@ -186,10 +186,10 @@ class _ExportOptionsState extends State<ExportOptions> {
                         // Share Destination Options
                         ShareDestinationOptions(
                             onDestinationSelected: (destination) {
-                          setState(() {
-                            _shareDestination = destination;
-                          });
-                        }),
+                              setState(() {
+                                _shareDestination = destination;
+                              });
+                            }),
 
                         SizedBox(height: 4.h),
                       ]))),
@@ -418,7 +418,7 @@ class _ExportOptionsState extends State<ExportOptions> {
             progress: _exportProgress,
             status: _exportStatus,
             errorMessage: '',
-            estimatedTime: '0',
+            estimatedTime: 0,
             hasError: false,
             isCompleted: false,
             onCancel: () {

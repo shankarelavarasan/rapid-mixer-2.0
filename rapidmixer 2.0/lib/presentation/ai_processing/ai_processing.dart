@@ -31,7 +31,7 @@ class _AIProcessingState extends State<AIProcessing>
   double _progress = 0.0;
   String _currentStage = '';
   Map<String, dynamic>? _inputFileData;
-  Map<String, String>? _resultStems;
+  Map<String, dynamic>? _resultStems;
 
   final List<Map<String, dynamic>> _processingStages = [
     {
@@ -165,42 +165,49 @@ class _AIProcessingState extends State<AIProcessing>
   }
 
   Future<void> _startProcessing() async {
-    if (_inputFileData == null || !_inputFileData!.containsKey("path") || _inputFileData!["path"] == null || (_inputFileData!["path"] as String).isEmpty) {
-      _showErrorDialog('Invalid input file path');
-      return;
-    }
-  
+    if (_inputFileData == null) return;
+
     setState(() {
       _isProcessing = true;
       _isCompleted = false;
       _isCancelled = false;
       _progress = 0.0;
     });
-  
+
     try {
-      final inputPath = _inputFileData!["path"] as String;
-      final stems = await _processingService.separateStems(inputPath);
-      if (stems.isNotEmpty && !_isCancelled) {
-        setState(() {
-          _resultStems = stems;
-          _isCompleted = true;
-          _progress = 1.0;
-        });
-        for (var stage in _processingStages) {
-          stage["isCompleted"] = true;
-          stage["isActive"] = false;
+      final inputPath = _inputFileData!["path"] as String? ?? "";
+
+      if (inputPath.isNotEmpty) {
+        final stems = await _processingService.separateStems(inputPath);
+
+        if (stems != null && stems.isNotEmpty && !_isCancelled) {
+          setState(() {
+            _resultStems = stems;
+            _isCompleted = true;
+            _progress = 1.0;
+          });
+
+          // Mark all stages as completed
+          for (var stage in _processingStages) {
+            stage["isCompleted"] = true;
+            stage["isActive"] = false;
+          }
+
+          // Show completion and navigate to track editor after delay
+          await Future.delayed(const Duration(seconds: 2));
+          if (mounted && !_isCancelled) {
+            _navigateToTrackEditor();
+          }
         }
-        await Future.delayed(const Duration(seconds: 2));
-        if (mounted && !_isCancelled) {
-          _navigateToTrackEditor();
-        }
+      } else {
+        throw Exception('Invalid input file path');
       }
     } catch (e) {
       if (mounted && !_isCancelled) {
-        _showErrorDialog('Processing failed: ${e}');
+        _showErrorDialog('Processing failed: $e');
       }
     } finally {
-      if (mounted && !_isCancelled) {
+      if (mounted) {
         setState(() {
           _isProcessing = false;
         });
@@ -245,10 +252,12 @@ class _AIProcessingState extends State<AIProcessing>
   }
 
   void _navigateToTrackEditor() {
-    Navigator.pushReplacementNamed(context, '/track-editor', arguments: {
-      'inputFile': _inputFileData,
-      'stems': _resultStems,
-    });
+    if (_resultStems != null) {
+      Navigator.pushReplacementNamed(context, AppRoutes.trackEditor, arguments: {
+        'inputFile': _inputFileData,
+        'stems': _resultStems,
+      });
+    }
   }
 
   void _showErrorDialog(String error) {

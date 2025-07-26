@@ -339,17 +339,3 @@ class ExportService {
     _errorController.close();
   }
 }
-
-Future<String?> exportStems(Map<String, String> stems) async {
-  // Create zip file containing all stems
-  final zipFile = File('${tempDir.path}/stems.zip');
-  final encoder = ZipFileEncoder();
-  encoder.create(zipFile.path);
-  
-  stems.forEach((name, path) {
-    encoder.addFile(File(path), '${name}_stem.wav');
-  });
-  
-  encoder.close();
-  return zipFile.path;
-}

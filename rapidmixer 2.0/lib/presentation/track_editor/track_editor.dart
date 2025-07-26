@@ -237,7 +237,7 @@ class _TrackEditorState extends State<TrackEditor>
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args.containsKey('stems')) {
-        _loadStemData(args['stems'] as Map<String, String>);
+        _loadStemData(args['stems'] as Map<String, dynamic>);
       }
     });
   }
@@ -280,19 +280,69 @@ class _TrackEditorState extends State<TrackEditor>
     });
   }
 
-  void _loadStemData(Map<String, String> stemPaths) {
-    for (int i = 0; i < _tracks.length; i++) {
-      final trackName = _tracks[i]["name"].toString().toLowerCase();
-      final stemPath = stemPaths[trackName];
-      if (stemPath != null) {
-        _tracks[i]["stemPath"] = stemPath;
-        // Load stem into audio service
-        _audioService.loadStemTrack(trackName, stemPath);
+  void _loadStemData(Map<String, dynamic> stemPaths) {
+    // Clear existing tracks
+    _tracks.clear();
+
+    // Base URL for stems - IMPORTANT: Use 10.0.2.2 for Android emulator
+    const String baseUrl = "https://rapid-mixer-2-0.onrender.com/separated/";
+
+    // Dynamically create tracks from stem paths
+    stemPaths.forEach((stemName, stemFileName) {
+      // Ensure stemFileName is a string
+      if (stemFileName is String) {
+        final String stemUrl = "$baseUrl$stemFileName";
+        _tracks.add({
+          "id": stemName.hashCode,
+          "name": stemName.toUpperCase(),
+          "icon": _getIconForStem(stemName),
+          "color": _getColorForStem(stemName),
+          "isMuted": false,
+          "isSolo": false,
+          "volume": 0.8,
+          "pitch": 0.0,
+          "speed": 1.0,
+          "level": 0.0, // Initial level
+          "stemPath": stemUrl,
+          "waveformData": [], // Placeholder, will be generated
+        });
+        _audioService.loadStemTrack(stemName, stemUrl);
       }
-    }
+    });
+
     setState(() {
       _hasUnsavedChanges = true;
     });
+  }
+
+  String _getIconForStem(String stemName) {
+    switch (stemName.toLowerCase()) {
+      case 'vocals':
+        return 'mic';
+      case 'drums':
+        return 'music_note';
+      case 'bass':
+        return 'graphic_eq';
+      case 'piano':
+        return 'piano';
+      default:
+        return 'audiotrack';
+    }
+  }
+
+  Color _getColorForStem(String stemName) {
+    switch (stemName.toLowerCase()) {
+      case 'vocals':
+        return const Color(0xFF00D4FF);
+      case 'drums':
+        return const Color(0xFFFF4757);
+      case 'bass':
+        return const Color(0xFF00C896);
+      case 'piano':
+        return const Color(0xFFFFB800);
+      default:
+        return const Color(0xFFB0B0B0);
+    }
   }
 
   void _startAutoSave() {
@@ -680,19 +730,7 @@ class _TrackEditorState extends State<TrackEditor>
           SizedBox(height: 2.h),
           FloatingActionButton(
             heroTag: "ai_processing",
-            onPressed: () {
-              if (_tracks.isNotEmpty && _tracks[0]["path"] != null && (_tracks[0]["path"] as String).isNotEmpty) {
-                Navigator.pushNamed(context, '/ai-processing', arguments: _tracks[0]);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("No valid audio track available for AI processing."),
-                    backgroundColor: AppTheme.errorColor,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
+            onPressed: () => Navigator.pushNamed(context, '/ai-processing'),
             backgroundColor: AppTheme.successColor,
             child: CustomIconWidget(
               iconName: 'auto_fix_high',

@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'dart:io' if (dart.library.io) 'dart:io';
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
@@ -30,48 +30,38 @@ class AudioProcessingService {
   bool _isProcessing = false;
   bool get isProcessing => _isProcessing;
 
-  // Mock stem separation for demo purposes
-  // In a real app, this would connect to a backend service like Spleeter or Demucs
-  Future<Map<String, String>> separateStems(String inputFilePath) async {
-    if (inputFilePath == null || inputFilePath.isEmpty) {
-      _errorController.add('Invalid input file path');
-      return {};
-    }
-
+  Future<Map<String, dynamic>?> separateStems(String inputFilePath) async {
     _isProcessing = true;
-    
+    _statusController.add('Uploading audio for stem separation...');
+    _progressController.add(0.1);
+
+    // Use your machine's local IP when running on a real device
+    // Use 10.0.2.2 for Android Emulator
+    final url = Uri.parse('https://rapid-mixer-2-0.onrender.com/split-audio');
+    final request = http.MultipartRequest('POST', uri);
+
     try {
-      // For demo purposes, use mock implementations instead of actual API call
-      if (kIsWeb) {
-        return await _mockStemSeparationWeb(inputFilePath);
-      } else {
-        return await _mockStemSeparationMobile(inputFilePath);
-      }
-      
-      /* Commented out actual API implementation for demo
-      _statusController.add('Uploading audio for AI processing...');
-      final uri = Uri.parse('https://your-backend-api.com/process');
-      final request = http.MultipartRequest('POST', uri)
-        ..files.add(await http.MultipartFile.fromPath('audio', inputFilePath));
+      final file = await http.MultipartFile.fromPath('file', inputFilePath);
+      request.files.add(file);
+
+      _statusController.add('Processing audio with AI...');
+      _progressController.add(0.5);
+
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+
+      _progressController.add(1.0);
+      _statusController.add('Stem separation complete!');
+
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        // Expecting backend to return a map of stem names to file URLs/paths
-        final stems = <String, String>{};
-        for (final entry in data.entries) {
-          stems[entry.key] = entry.value.toString();
-        }
-        _statusController.add('Stem separation completed!');
-        return stems;
+        return jsonDecode(response.body);
       } else {
-        _errorController.add('Backend error: ${response.statusCode}');
-        return {};
+        _errorController.add('API Error: ${response.body}');
+        return null;
       }
-      */
     } catch (e) {
-      _errorController.add('Stem separation failed: $e');
-      return {};
+      _errorController.add('Exception during API call: $e');
+      return null;
     } finally {
       _isProcessing = false;
     }
